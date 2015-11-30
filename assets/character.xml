@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:b94162e65ed1e92f0c4cc3a852c9ef7f:7536e2f5c6221a150f4e2f7725fedb1b:428a9efa1912d018a7e0f708df8b0f46$ -->
+<TextureAtlas imagePath="character.png" width="233" height="1029">
+    <SubTexture name="01" x="1" y="1" width="126" height="258" frameX="-108" frameY="-41" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="02" x="1" y="260" width="119" height="250" frameX="-105" frameY="-44" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="03" x="1" y="772" width="87" height="256" frameX="-120" frameY="-41" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="04" x="89" y="772" width="81" height="256" frameX="-122" frameY="-39" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="05" x="128" y="256" width="91" height="253" frameX="-119" frameY="-43" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="06" x="128" y="1" width="104" height="254" frameX="-114" frameY="-44" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="07" x="92" y="511" width="91" height="257" frameX="-118" frameY="-41" frameWidth="325" frameHeight="325"/>
+    <SubTexture name="08" x="1" y="511" width="90" height="260" frameX="-113" frameY="-40" frameWidth="325" frameHeight="325"/>
+</TextureAtlas>
