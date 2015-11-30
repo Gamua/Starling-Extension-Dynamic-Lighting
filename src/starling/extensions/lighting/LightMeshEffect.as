@@ -62,9 +62,9 @@ package starling.extensions.lighting
                     RenderUtil.createAGALTexOperation("ft0", "v2", 0, texture),
                     RenderUtil.createAGALTexOperation("ft1", "v3", 1, normalTexture, false),
 
-                    "mul ft1, ft1, fc4",    // normal vector *= 2
-                    "sub ft1, ft1, fc3",    // normal vector -= 1
-                    "nrm ft1.xyz, ft1.xyz", // normalize normal vector
+                    "mul ft1.xy, ft1.xy, fc4.xy", // normal.xy *= 2
+                    "sub ft1.xy, ft1.xy, fc3.xy", // normal.xy -= 1
+                    "nrm ft1.xyz, ft1.xyz",       // normalize normal vector
 
                     "sub ft2, v0, fc0",     // calculate light vector
                     "neg ft2.x, ft2.x",     // invert x-direction of light vector
