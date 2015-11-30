@@ -7,4 +7,4 @@ Beware: this extension requires Starling Framework 2.0, which is not available t
 
 * The normal maps in this demo were created using the excellent [SpriteIlluminator](https://www.codeandweb.com/spriteilluminator) from Andreas Löw.
 * Currently, this extension supports only one point light. More features will be added soon. 
-* More information about this extension can be found in the [Starling Wiki](link).
+* More information about this extension can be found in the [Starling Wiki](http://wiki.starling-framework.org/extensions/dynamic_lighting).
