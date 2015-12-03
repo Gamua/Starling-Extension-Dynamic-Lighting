@@ -35,6 +35,7 @@ package starling.extensions.lighting
         private var sPoint:Point = new Point();
         private var sMatrix:Matrix = new Matrix();
         private var sMatrix3D:Matrix3D = new Matrix3D();
+        private var sMatrixAlt3D:Matrix3D = new Matrix3D();
 
         public function LightMeshStyle(normalTexture:Texture=null, texture:Texture=null)
         {
@@ -119,16 +120,18 @@ package starling.extensions.lighting
             var lightEffect:LightMeshEffect = effect as LightMeshEffect;
             lightEffect.normalTexture = _normalTexture;
 
-            if (_light && _light.stage)
+            if (_light)
             {
-                // when batching, the target is not part of the display list; it's placed
-                // in the stage coordinate system, so we can simply use the transformation to the
-                // stage, instead.
+                // transformation matrix to the light's base object (should be the stage)
+                _light.getTransformationMatrix3D(null, sMatrix3D);
 
-                if (target.stage)
-                    _light.getTransformationMatrix3D(target, sMatrix3D);
-                else
-                    _light.getTransformationMatrix3D(null, sMatrix3D);
+                // transformation matrix from the stage to the current coordinate system
+                if (state.is3D) sMatrixAlt3D.copyFrom(state.modelviewMatrix3D);
+                else MatrixUtil.convertTo3D(state.modelviewMatrix, sMatrixAlt3D);
+
+                // combine those matrices
+                sMatrixAlt3D.invert();
+                sMatrix3D.append(sMatrixAlt3D);
 
                 // in the local coordinate system of the light, its source is at [0, 0, 0]!
                 MatrixUtil.transformCoords3D(sMatrix3D, 0, 0, 0, lightEffect.lightPosition);
