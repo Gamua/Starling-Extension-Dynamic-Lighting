@@ -103,6 +103,7 @@ package starling.extensions.lighting
             if (_lightBulb == null)
             {
                 _lightBulb = new Image(createBulbTexture());
+                _lightBulb.alignPivot();
                 _lightBulb.color = _color;
                 _lightBulb.alpha = _brightness;
                 _lightBulb.useHandCursor = true;
