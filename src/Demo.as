@@ -31,67 +31,85 @@ package
         private static const CharacterXml:Class;
 
         private var _characters:Vector.<MovieClip>;
+        private var _stageWidth:Number;
+        private var _stageHeight:Number;
 
         public function Demo()
         {
+            _stageWidth  = Starling.current.stage.stageWidth;
+            _stageHeight = Starling.current.stage.stageHeight;
+            _characters = new <MovieClip>[];
+
             var characterTexture:Texture = Texture.fromEmbeddedAsset(CharacterTexture);
             var characterNormalTexture:Texture = Texture.fromEmbeddedAsset(CharacterNormalTexture);
             var characterXml:XML = XML(new CharacterXml());
 
             var textureAtlas:TextureAtlas = new TextureAtlas(characterTexture, characterXml);
             var normalTextureAtlas:TextureAtlas = new TextureAtlas(characterNormalTexture, characterXml);
-
             var textures:Vector.<Texture> = textureAtlas.getTextures();
             var normalTextures:Vector.<Texture> = normalTextureAtlas.getTextures();
 
-            var stageWidth:Number = Starling.current.stage.stageWidth;
-            var numCharacters:int = 8;
-            var characterWidth:Number = textures[0].frameWidth;
-            var offset:Number = (stageWidth + characterWidth) / numCharacters;
-
             var light:LightSource = new LightSource();
-            light.x = stageWidth / 2;
+            light.x = 380;
             light.y = 50;
-            light.z = -200;
+            light.z = -150;
             light.brightness = 0.6;
             light.ambientBrightness = 0.4;
             light.showLightBulb = true;
 
-            _characters = new <MovieClip>[];
+            addMarchingCharacters(8, light, textures, normalTextures);
+            addChild(light);
+        }
 
-            for (var i:int=0; i<numCharacters; ++i)
+        private function addMarchingCharacters(count:int, light:LightSource,
+                                               textures:Vector.<Texture>,
+                                               normalTextures:Vector.<Texture>):void
+        {
+            var characterWidth:Number = textures[0].frameWidth;
+            var offset:Number = (_stageWidth + characterWidth) / count;
+
+            for (var i:int=0; i<count; ++i)
             {
                 var movie:MovieClip = createCharacter(textures, normalTextures, light);
                 movie.currentTime = movie.totalTime * Math.random();
                 movie.x = -characterWidth + i * offset;
                 movie.y = -10;
+                movie.addEventListener(Event.ENTER_FRAME, onEnterFrame);
                 addChild(movie);
                 _characters.push(movie);
             }
 
-            addChild(light);
-            addEventListener(Event.ENTER_FRAME, onEnterFrame);
-        }
-
-        private function onEnterFrame(event:Event, passedTime:Number):void
-        {
-            var rightBounds:Number = Starling.current.stage.stageWidth;
-
-            for each (var character:MovieClip in _characters)
+            function onEnterFrame(event:Event, passedTime:Number):void
             {
+                var character:MovieClip = event.target as MovieClip;
                 character.advanceTime(passedTime);
                 character.x += 100 * passedTime;
 
-                if (character.x > rightBounds)
-                    character.x = -character.width;
+                if (character.x > _stageWidth)
+                    character.x = -character.width + (character.x - _stageWidth);
             }
+        }
+
+        /** This method is useful during development, to have a simple static image that's easy
+         *  to experiment with. */
+        private function addStaticCharacter(light:LightSource, texture:Texture, normalTexture:Texture):void
+        {
+            var movie:MovieClip = createCharacter(
+                    new <Texture>[texture],
+                    new <Texture>[normalTexture], light, 1);
+
+            movie.alignPivot();
+            movie.x = _stageWidth  / 2 + 0.5;
+            movie.y = _stageHeight / 2 + 0.5;
+            addChild(movie);
+            _characters.push(movie);
         }
 
         private function createCharacter(textures:Vector.<Texture>, normalTextures:Vector.<Texture>,
                                          light:LightSource, fps:int=12):MovieClip
         {
             var movie:MovieClip = new MovieClip(textures, fps);
-            var lightStyle:LightMeshStyle = new LightMeshStyle();
+            var lightStyle:LightMeshStyle = new LightMeshStyle(normalTextures[0]);
             lightStyle.light = light;
             movie.style = lightStyle;
 

@@ -25,7 +25,8 @@ package starling.extensions.lighting
     public class LightMeshEffect extends MeshEffect
     {
         public static const VERTEX_FORMAT:VertexDataFormat = VertexDataFormat.fromString(
-            "position(float2), color(bytes4), texCoords(float2), normalTexCoords(float2)");
+            "position(float2), color(bytes4), texCoords(float2), normalTexCoords(float2), " +
+            "xAxis(float2), yAxis(float2)");
 
         private var _normalTexture:Texture;
         private var _lightPos:Vector3D;
@@ -46,17 +47,24 @@ package starling.extensions.lighting
             if (_normalTexture == null) return super.createProgram();
 
             var vertexShader:String = [
-                    "mov  v0, va0     ",    // pass vertex position to FB
-                    "mul  v1, va1, vc4",    // pass vertex color * vertex alpha to FP
-                    "mov  v2, va2     ",    // pass texture coordinates to FP
-                    "mov  v3, va3     ",    // pass normal texture coordinates to FP
-                    "m44  op, va0, vc0"     // transform vertex position into clip space
+                    "mov  v0, va0     ",     // pass vertex position to FB
+                    "mul  v1, va1, vc4",     // pass vertex color * vertex alpha to FP
+                    "mov  v2, va2     ",     // pass texture coordinates to FP
+                    "mov  v3, va3     ",     // pass normal texture coordinates to FP
+                    "mov  v4, va4     ",     // pass local x-axis to FP
+                    "mov  v5, va5     ",     // pass local y-axis to FP
+                    "mov  v6.w, va5.w ",     // store something (anything) in the w-coordinate
+                    "crs  v6.xyz, va4, va5", // calculate local z-axis, pass to FP
+                    "m44  op, va0, vc0"      // transform vertex position into clip space
             ].join("\n");
 
             // v0 - vertex position
             // v1 - vertex color * vertex alpha
             // v2 - texture coords
             // v3 - normal texture coords
+            // v4 - x-axis
+            // v5 - y-axis
+            // v6 - z-axis
 
             var fragmentShader:String = [
                     RenderUtil.createAGALTexOperation("ft0", "v2", 0, texture),
@@ -64,6 +72,7 @@ package starling.extensions.lighting
 
                     "mul ft1.xy, ft1.xy, fc4.xy", // normal.xy *= 2
                     "sub ft1.xy, ft1.xy, fc3.xy", // normal.xy -= 1
+                    "m33 ft1.xyz, ft1, v4",       // bring NV into correct coordinate system
                     "nrm ft1.xyz, ft1.xyz",       // normalize normal vector
 
                     "sub ft2, v0, fc0",     // calculate light vector
@@ -99,6 +108,8 @@ package starling.extensions.lighting
             va1 — vertex color (rgba), using premultiplied alpha
             va2 — texture coordinates
             va3 - normal texture coordinates
+            va4 - x-axis vector (xy)
+            va5 - y-axis vector (xy)
 
             fs0 — texture
             fs1 - normal texture
@@ -124,6 +135,8 @@ package starling.extensions.lighting
                 RenderUtil.setSamplerStateAt(1, _normalTexture.mipMapping, TextureSmoothing.BILINEAR);
                 context.setTextureAt(1, _normalTexture.base);
                 vertexFormat.setVertexBufferAttribute(vertexBuffer, 3, "normalTexCoords");
+                vertexFormat.setVertexBufferAttribute(vertexBuffer, 4, "xAxis");
+                vertexFormat.setVertexBufferAttribute(vertexBuffer, 5, "yAxis");
             }
         }
 
@@ -133,6 +146,8 @@ package starling.extensions.lighting
             {
                 context.setTextureAt(1, null);
                 context.setVertexBufferAt(3, null);
+                context.setVertexBufferAt(4, null);
+                context.setVertexBufferAt(5, null);
             }
 
             super.afterDraw(context);

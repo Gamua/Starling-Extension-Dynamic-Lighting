@@ -10,12 +10,15 @@
 
 package starling.extensions.lighting
 {
+    import flash.geom.Matrix;
     import flash.geom.Matrix3D;
     import flash.geom.Point;
 
     import starling.display.Mesh;
     import starling.rendering.MeshEffect;
     import starling.rendering.MeshStyle;
+    import starling.rendering.RenderState;
+    import starling.rendering.VertexData;
     import starling.rendering.VertexDataFormat;
     import starling.textures.Texture;
     import starling.utils.Color;
@@ -30,7 +33,8 @@ package starling.extensions.lighting
 
         // helpers
         private var sPoint:Point = new Point();
-        private var sMatrix:Matrix3D = new Matrix3D();
+        private var sMatrix:Matrix = new Matrix();
+        private var sMatrix3D:Matrix3D = new Matrix3D();
 
         public function LightMeshStyle(normalTexture:Texture=null, texture:Texture=null)
         {
@@ -70,6 +74,24 @@ package starling.extensions.lighting
             super.copyFrom(meshStyle);
         }
 
+        override public function copyVertexDataTo(target:VertexData, targetVertexID:int = 0,
+                                                  matrix:Matrix = null, vertexID:int = 0,
+                                                  numVertices:int = -1):void
+        {
+            super.copyVertexDataTo(target, targetVertexID, matrix, vertexID, numVertices);
+
+            if (matrix)
+            {
+                // when the mesh is transformed, the directions of the normal vectors must change,
+                // too. To be able to rotate them correctly in the shaders, we store the direction
+                // of x- and y-axis in the vertex data. (The z-axis is the cross product of x & y.)
+
+                sMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
+                vertexData.copyAttributeTo(target, targetVertexID, "xAxis", sMatrix, vertexID, numVertices);
+                vertexData.copyAttributeTo(target, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
+            }
+        }
+
         override public function canBatchWith(meshStyle:MeshStyle):Boolean
         {
             var litMeshStyle:LightMeshStyle = meshStyle as LightMeshStyle;
@@ -92,10 +114,10 @@ package starling.extensions.lighting
             return new LightMeshEffect();
         }
 
-        override public function updateEffect(effect:MeshEffect):void
+        override public function updateEffect(effect:MeshEffect, state:RenderState):void
         {
-            var litEffect:LightMeshEffect = effect as LightMeshEffect;
-            litEffect.normalTexture = _normalTexture;
+            var lightEffect:LightMeshEffect = effect as LightMeshEffect;
+            lightEffect.normalTexture = _normalTexture;
 
             if (_light && _light.stage)
             {
@@ -104,18 +126,18 @@ package starling.extensions.lighting
                 // stage, instead.
 
                 if (target.stage)
-                    _light.getTransformationMatrix3D(target, sMatrix);
+                    _light.getTransformationMatrix3D(target, sMatrix3D);
                 else
-                    _light.getTransformationMatrix3D(null, sMatrix);
+                    _light.getTransformationMatrix3D(null, sMatrix3D);
 
                 // in the local coordinate system of the light, its source is at [0, 0, 0]!
-                MatrixUtil.transformCoords3D(sMatrix, 0, 0, 0, litEffect.lightPosition);
+                MatrixUtil.transformCoords3D(sMatrix3D, 0, 0, 0, lightEffect.lightPosition);
 
-                litEffect.diffuseColor = Color.multiply(_light.color, _light.brightness);
-                litEffect.ambientColor = Color.multiply(_light.ambientColor, _light.ambientBrightness);
+                lightEffect.diffuseColor = Color.multiply(_light.color, _light.brightness);
+                lightEffect.ambientColor = Color.multiply(_light.ambientColor, _light.ambientBrightness);
             }
 
-            super.updateEffect(effect);
+            super.updateEffect(effect, state);
         }
 
         override public function get vertexFormat():VertexDataFormat
@@ -131,6 +153,8 @@ package starling.extensions.lighting
             {
                 getTexCoords(i, sPoint);
                 setNormalTexCoords(i, sPoint.x, sPoint.y);
+                vertexData.setPoint(i, "xAxis", 1, 0);
+                vertexData.setPoint(i, "yAxis", 0, 1);
             }
         }
 
