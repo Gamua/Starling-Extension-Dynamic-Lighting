@@ -53,9 +53,16 @@ package starling.extensions.lighting
                     "mov  v3, va3     ",     // pass normal texture coordinates to FP
                     "mov  v4, va4     ",     // pass local x-axis to FP
                     "mov  v5, va5     ",     // pass local y-axis to FP
-                    "mov  v6.w, va5.w ",     // store something (anything) in the w-coordinate
-                    "crs  v6.xyz, va4, va5", // calculate local z-axis, pass to FP
-                    "m44  op, va0, vc0"      // transform vertex position into clip space
+                    "m44  op, va0, vc0",     // transform vertex position into clip space
+
+                    // --- this code produces errors on some Windows devices ------------------
+                    // "mov  v6, va5     ",             // initialize v6 (with anything)
+                    // "crs  v6.xyz, va4.xyz, va5.xyz", // calculate local z-axis, pass to FP
+
+                    // --- so we make the cross product manually until that is fixed ----------
+                    "mul vt0.xyzw, va4.yzxw, va5.zxyw",
+                    "mul vt1.xyzw, va4.zxyw, va5.yzxw",
+                    "sub v6, vt0, vt1"
             ].join("\n");
 
             // v0 - vertex position
