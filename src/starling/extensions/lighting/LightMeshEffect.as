@@ -25,7 +25,7 @@ package starling.extensions.lighting
     public class LightMeshEffect extends MeshEffect
     {
         public static const VERTEX_FORMAT:VertexDataFormat = VertexDataFormat.fromString(
-            "position(float2), color(bytes4), texCoords(float2), normalTexCoords(float2), " +
+            "position(float2), texCoords(float2), color(bytes4), normalTexCoords(float2), " +
             "xAxis(float2), yAxis(float2)");
 
         private var _normalTexture:Texture;
@@ -48,8 +48,8 @@ package starling.extensions.lighting
 
             var vertexShader:String = [
                     "mov  v0, va0     ",     // pass vertex position to FB
-                    "mul  v1, va1, vc4",     // pass vertex color * vertex alpha to FP
-                    "mov  v2, va2     ",     // pass texture coordinates to FP
+                    "mov  v1, va1     ",     // pass texture coordinates to FP
+                    "mul  v2, va2, vc4",     // pass vertex color * vertex alpha to FP
                     "mov  v3, va3     ",     // pass normal texture coordinates to FP
                     "mov  v4, va4     ",     // pass local x-axis to FP
                     "mov  v5, va5     ",     // pass local y-axis to FP
@@ -74,7 +74,7 @@ package starling.extensions.lighting
             // v6 - z-axis
 
             var fragmentShader:String = [
-                    RenderUtil.createAGALTexOperation("ft0", "v2", 0, texture),
+                    RenderUtil.createAGALTexOperation("ft0", "v1", 0, texture),
                     RenderUtil.createAGALTexOperation("ft1", "v3", 1, normalTexture, false),
 
                     "mul ft1.xy, ft1.xy, fc4.xy", // normal.xy *= 2
@@ -86,7 +86,7 @@ package starling.extensions.lighting
                     "neg ft2.x, ft2.x",     // invert x-direction of light vector
                     "nrm ft2.xyz, ft2.xyz", // normalize light vector
 
-                    "mul ft0, ft0, v1",     // surface color = texel * vertex color
+                    "mul ft0, ft0, v2",     // surface color = texel * vertex color
                     "dp3 ft3, ft1, ft2",    // dotProd = normal vector (dot) light vector
                     "mul ft4, ft3, fc1",    // diffuse color = dotProd * diffuse color
                     "mov ft4.w, fc3.w",     // set alpha of diffuse color to '1.0'
@@ -112,8 +112,8 @@ package starling.extensions.lighting
             fc4 - [2, 2, 2, 2]
 
             va0 — vertex position (xy)
-            va1 — vertex color (rgba), using premultiplied alpha
-            va2 — texture coordinates
+            va1 — texture coordinates
+            va2 — vertex color (rgba), using premultiplied alpha
             va3 - normal texture coordinates
             va4 - x-axis vector (xy)
             va5 - y-axis vector (xy)
