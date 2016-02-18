@@ -25,8 +25,8 @@ package starling.extensions.lighting
     public class LightEffect extends MeshEffect
     {
         public static const VERTEX_FORMAT:VertexDataFormat = VertexDataFormat.fromString(
-            "position(float2), texCoords(float2), color(bytes4), normalTexCoords(float2), " +
-            "xAxis(float2), yAxis(float2)");
+            "position:float2, texCoords:float2, color:bytes4, normalTexCoords:float2, " +
+            "xAxis:float2, yAxis:float2");
 
         private var _normalTexture:Texture;
         private var _lightPos:Vector3D;
