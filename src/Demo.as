@@ -14,7 +14,7 @@ package
     import starling.display.MovieClip;
     import starling.display.Sprite;
     import starling.events.Event;
-    import starling.extensions.lighting.LightMeshStyle;
+    import starling.extensions.lighting.LightStyle;
     import starling.extensions.lighting.LightSource;
     import starling.textures.Texture;
     import starling.textures.TextureAtlas;
@@ -109,7 +109,7 @@ package
                                          light:LightSource, fps:int=12):MovieClip
         {
             var movie:MovieClip = new MovieClip(textures, fps);
-            var lightStyle:LightMeshStyle = new LightMeshStyle(normalTextures[0]);
+            var lightStyle:LightStyle = new LightStyle(normalTextures[0]);
             lightStyle.light = light;
             movie.style = lightStyle;
 

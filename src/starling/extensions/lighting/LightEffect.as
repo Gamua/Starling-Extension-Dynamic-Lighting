@@ -22,7 +22,7 @@ package starling.extensions.lighting
     import starling.utils.Color;
     import starling.utils.RenderUtil;
 
-    public class LightMeshEffect extends MeshEffect
+    public class LightEffect extends MeshEffect
     {
         public static const VERTEX_FORMAT:VertexDataFormat = VertexDataFormat.fromString(
             "position(float2), texCoords(float2), color(bytes4), normalTexCoords(float2), " +
@@ -35,7 +35,7 @@ package starling.extensions.lighting
 
         private static const sVector:Vector.<Number> = new Vector.<Number>(4, true);
 
-        public function LightMeshEffect()
+        public function LightEffect()
         {
             _lightPos = new Vector3D();
             _diffuseColor = 0xffffff;

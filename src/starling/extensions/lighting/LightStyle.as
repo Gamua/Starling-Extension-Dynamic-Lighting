@@ -24,9 +24,9 @@ package starling.extensions.lighting
     import starling.utils.Color;
     import starling.utils.MatrixUtil;
 
-    public class LightMeshStyle extends MeshStyle
+    public class LightStyle extends MeshStyle
     {
-        public static const VERTEX_FORMAT:VertexDataFormat = LightMeshEffect.VERTEX_FORMAT;
+        public static const VERTEX_FORMAT:VertexDataFormat = LightEffect.VERTEX_FORMAT;
 
         private var _light:LightSource;
         private var _normalTexture:Texture;
@@ -37,7 +37,7 @@ package starling.extensions.lighting
         private var sMatrix3D:Matrix3D = new Matrix3D();
         private var sMatrixAlt3D:Matrix3D = new Matrix3D();
 
-        public function LightMeshStyle(normalTexture:Texture=null, texture:Texture=null)
+        public function LightStyle(normalTexture:Texture=null, texture:Texture=null)
         {
             super(texture);
             _normalTexture = normalTexture;
@@ -66,7 +66,7 @@ package starling.extensions.lighting
 
         override public function copyFrom(meshStyle:MeshStyle):void
         {
-            var litMeshStyle:LightMeshStyle = meshStyle as LightMeshStyle;
+            var litMeshStyle:LightStyle = meshStyle as LightStyle;
             if (litMeshStyle)
             {
                 _light = litMeshStyle._light;
@@ -95,7 +95,7 @@ package starling.extensions.lighting
 
         override public function canBatchWith(meshStyle:MeshStyle):Boolean
         {
-            var litMeshStyle:LightMeshStyle = meshStyle as LightMeshStyle;
+            var litMeshStyle:LightStyle = meshStyle as LightStyle;
             if (litMeshStyle && super.canBatchWith(meshStyle))
             {
                 var newNormalTexture:Texture = litMeshStyle._normalTexture;
@@ -112,12 +112,12 @@ package starling.extensions.lighting
 
         override public function createEffect():MeshEffect
         {
-            return new LightMeshEffect();
+            return new LightEffect();
         }
 
         override public function updateEffect(effect:MeshEffect, state:RenderState):void
         {
-            var lightEffect:LightMeshEffect = effect as LightMeshEffect;
+            var lightEffect:LightEffect = effect as LightEffect;
             lightEffect.normalTexture = _normalTexture;
 
             if (_light)
