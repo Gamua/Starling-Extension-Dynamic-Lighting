@@ -37,9 +37,8 @@ package starling.extensions.lighting
         private var sMatrix3D:Matrix3D = new Matrix3D();
         private var sMatrixAlt3D:Matrix3D = new Matrix3D();
 
-        public function LightStyle(normalTexture:Texture=null, texture:Texture=null)
+        public function LightStyle(normalTexture:Texture=null)
         {
-            super(texture);
             _normalTexture = normalTexture;
         }
 
@@ -100,7 +99,9 @@ package starling.extensions.lighting
             {
                 var newNormalTexture:Texture = litMeshStyle._normalTexture;
 
-                if (_normalTexture == null && newNormalTexture == null)
+                if (_light != litMeshStyle._light)
+                    return false;
+                else if (_normalTexture == null && newNormalTexture == null)
                     return true;
                 else if (_normalTexture && newNormalTexture)
                     return _normalTexture.base == newNormalTexture.base;
@@ -181,6 +182,13 @@ package starling.extensions.lighting
         }
 
         public function get light():LightSource { return _light; }
-        public function set light(value:LightSource):void { _light = value; }
+        public function set light(value:LightSource):void
+        {
+            if (_light != value)
+            {
+                _light = value;
+                setRequiresRedraw();
+            }
+        }
     }
 }

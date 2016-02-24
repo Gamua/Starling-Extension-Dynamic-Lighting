@@ -101,26 +101,24 @@ package starling.extensions.lighting
         {
             super.beforeDraw(context);
 
-            /*
-            vc0-vc3 — MVP matrix
-            vc4 — alpha value (same value for all components)
+            // vc0-vc3 — MVP matrix
+            // vc4 — alpha value (same value for all components)
 
-            fc0 - light position
-            fc1 - light color * brightness
-            fc2 - ambient color
-            fc3 - [1, 1, 1, 1]
-            fc4 - [2, 2, 2, 2]
+            // fc0 - light position
+            // fc1 - light color * brightness
+            // fc2 - ambient color
+            // fc3 - [1, 1, 1, 1]
+            // fc4 - [2, 2, 2, 2]
 
-            va0 — vertex position (xy)
-            va1 — texture coordinates
-            va2 — vertex color (rgba), using premultiplied alpha
-            va3 - normal texture coordinates
-            va4 - x-axis vector (xy)
-            va5 - y-axis vector (xy)
+            // va0 — vertex position (xy)
+            // va1 — texture coordinates
+            // va2 — vertex color (rgba), using premultiplied alpha
+            // va3 - normal texture coordinates
+            // va4 - x-axis vector (xy)
+            // va5 - y-axis vector (xy)
 
-            fs0 — texture
-            fs1 - normal texture
-            */
+            // fs0 — texture
+            // fs1 - normal texture
 
             if (_normalTexture)
             {
@@ -141,9 +139,9 @@ package starling.extensions.lighting
 
                 RenderUtil.setSamplerStateAt(1, _normalTexture.mipMapping, TextureSmoothing.BILINEAR);
                 context.setTextureAt(1, _normalTexture.base);
-                vertexFormat.setVertexBufferAttribute(vertexBuffer, 3, "normalTexCoords");
-                vertexFormat.setVertexBufferAttribute(vertexBuffer, 4, "xAxis");
-                vertexFormat.setVertexBufferAttribute(vertexBuffer, 5, "yAxis");
+                vertexFormat.setVertexBufferAt(3, vertexBuffer, "normalTexCoords");
+                vertexFormat.setVertexBufferAt(4, vertexBuffer, "xAxis");
+                vertexFormat.setVertexBufferAt(5, vertexBuffer, "yAxis");
             }
         }
 
