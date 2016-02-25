@@ -74,11 +74,11 @@ package starling.extensions.lighting
             super.copyFrom(meshStyle);
         }
 
-        override public function copyVertexDataTo(target:VertexData, targetVertexID:int = 0,
-                                                  matrix:Matrix = null, vertexID:int = 0,
-                                                  numVertices:int = -1):void
+        override public function batchVertexData(target:VertexData, targetVertexID:int = 0,
+                                                 matrix:Matrix = null, vertexID:int = 0,
+                                                 numVertices:int = -1):void
         {
-            super.copyVertexDataTo(target, targetVertexID, matrix, vertexID, numVertices);
+            super.batchVertexData(target, targetVertexID, matrix, vertexID, numVertices);
 
             if (matrix)
             {
