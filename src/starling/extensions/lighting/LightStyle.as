@@ -74,11 +74,11 @@ package starling.extensions.lighting
             super.copyFrom(meshStyle);
         }
 
-        override public function batchVertexData(target:VertexData, targetVertexID:int = 0,
+        override public function batchVertexData(targetStyle:MeshStyle, targetVertexID:int = 0,
                                                  matrix:Matrix = null, vertexID:int = 0,
                                                  numVertices:int = -1):void
         {
-            super.batchVertexData(target, targetVertexID, matrix, vertexID, numVertices);
+            super.batchVertexData(targetStyle, targetVertexID, matrix, vertexID, numVertices);
 
             if (matrix)
             {
@@ -86,9 +86,12 @@ package starling.extensions.lighting
                 // too. To be able to rotate them correctly in the shaders, we store the direction
                 // of x- and y-axis in the vertex data. (The z-axis is the cross product of x & y.)
 
+                var targetLightStyle:LightStyle = targetStyle as LightStyle;
+                var targetVertexData:VertexData = targetLightStyle.vertexData;
+
                 sMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-                vertexData.copyAttributeTo(target, targetVertexID, "xAxis", sMatrix, vertexID, numVertices);
-                vertexData.copyAttributeTo(target, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
+                vertexData.copyAttributeTo(targetVertexData, targetVertexID, "xAxis", sMatrix, vertexID, numVertices);
+                vertexData.copyAttributeTo(targetVertexData, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
             }
         }
 
