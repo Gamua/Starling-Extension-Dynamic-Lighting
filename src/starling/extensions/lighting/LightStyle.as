@@ -16,10 +16,10 @@ package starling.extensions.lighting
 
     import starling.display.Mesh;
     import starling.rendering.MeshEffect;
-    import starling.rendering.MeshStyle;
     import starling.rendering.RenderState;
     import starling.rendering.VertexData;
     import starling.rendering.VertexDataFormat;
+    import starling.styles.MeshStyle;
     import starling.textures.Texture;
     import starling.utils.Color;
     import starling.utils.MatrixUtil;
