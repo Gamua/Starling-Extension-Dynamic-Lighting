@@ -73,8 +73,8 @@ package starling.extensions.lighting
             // v6 - z-axis
 
             var fragmentShader:String = [
-                    RenderUtil.createAGALTexOperation("ft0", "v1", 0, texture),
-                    RenderUtil.createAGALTexOperation("ft1", "v3", 1, normalTexture, false),
+                    tex("ft0", "v1", 0, texture),
+                    tex("ft1", "v3", 1, normalTexture, false),
 
                     "mul ft1.xy, ft1.xy, fc4.xy", // normal.xy *= 2
                     "sub ft1.xy, ft1.xy, fc3.xy", // normal.xy -= 1
@@ -136,7 +136,8 @@ package starling.extensions.lighting
                 sVector[0] = sVector[1] = sVector[2] = sVector[3] = 2.0;
                 context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 4, sVector);
 
-                RenderUtil.setSamplerStateAt(1, _normalTexture.mipMapping, TextureSmoothing.BILINEAR);
+                var repeat:Boolean = textureRepeat && _normalTexture.root.isPotTexture;
+                RenderUtil.setSamplerStateAt(1, _normalTexture.mipMapping, textureSmoothing, repeat);
                 context.setTextureAt(1, _normalTexture.base);
                 vertexFormat.setVertexBufferAt(3, vertexBuffer, "normalTexCoords");
                 vertexFormat.setVertexBufferAt(4, vertexBuffer, "xAxis");
