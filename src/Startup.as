@@ -11,6 +11,7 @@
 package {
 
     import flash.display.Sprite;
+    import flash.system.Capabilities;
 
     import starling.core.Starling;
 
@@ -22,8 +23,9 @@ package {
         public function Startup()
         {
             _starling = new Starling(Demo, stage);
-            _starling.enableErrorChecking = true;
-            _starling.showStats = true;
+            _starling.enableErrorChecking = Capabilities.isDebugger;
+            _starling.skipUnchangedFrames = true;
+            _starling.showStats = false;
             _starling.start();
         }
     }

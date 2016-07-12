@@ -15,6 +15,7 @@
           <map>
             <entry key="compiler.debug.swf" value="true" />
           </map>
+          <option name="additionalOptions" value="-advanced-telemetry" />
         </compiler-options>
         <packaging-air-desktop />
         <packaging-android />
