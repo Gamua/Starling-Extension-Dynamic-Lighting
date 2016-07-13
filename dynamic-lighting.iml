@@ -2,7 +2,7 @@
 <module type="Flex" version="4">
   <component name="FlexBuildConfigurationManager" active="dynamic-lighting">
     <configurations>
-      <configuration name="dynamic-lighting" pure-as="true" main-class="Startup" output-file="dynamic-lighting.swf" output-folder="$MODULE_DIR$/../../misc/starling-2/out/production/dynamic-lighting">
+      <configuration name="dynamic-lighting" pure-as="true" main-class="Startup" output-file="dynamic-lighting.swf" output-folder="$MODULE_DIR$/out">
         <dependencies target-player="19.0">
           <entries>
             <entry module-name="starling" build-configuration-name="starling">
@@ -15,7 +15,6 @@
           <map>
             <entry key="compiler.debug.swf" value="true" />
           </map>
-          <option name="additionalOptions" value="-advanced-telemetry" />
         </compiler-options>
         <packaging-air-desktop />
         <packaging-android />

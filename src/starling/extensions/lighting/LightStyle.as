@@ -124,13 +124,6 @@ package starling.extensions.lighting
                 sMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
                 vertexData.copyAttributeTo(targetVertexData, targetVertexID, "xAxis", sMatrix, vertexID, numVertices);
                 vertexData.copyAttributeTo(targetVertexData, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
-
-//                var point:Point = targetVertexData.getPoint(targetVertexID, "xAxis");
-//                trace("xAxis:", point.x.toFixed(1), point.y.toFixed(1));
-//
-//                var point:Point = targetVertexData.getPoint(targetVertexID, "yAxis");
-//                trace("yAxis:", point.x.toFixed(1), point.y.toFixed(1));
-//                trace("-");
             }
 
         }
@@ -198,8 +191,6 @@ package starling.extensions.lighting
                     lightPosOrDir = MatrixUtil.transformCoords3D(sMatrix3D, -1, 0, 0, sPoint3D);
                 }
                 
-//                trace(lightPosOrDir);
-
                 // update light properties
                 lightEffect.setLightAt(i, light.type, lightColor, lightPosOrDir);
             }
