@@ -43,8 +43,6 @@ package starling.extensions.lighting
 
         override protected function createProgram():Program
         {
-            if (_normalTexture == null) return super.createProgram();
-
             var vertexShader:Array = [
                 "mov vt0, va4",            // restore actual shininess value ...
                 "mul vt0.w, vt0.w, vc5.w", // ... by multiplying with 'MAX_SHININESS'
@@ -81,19 +79,29 @@ package starling.extensions.lighting
             // y goes up and z points towards the camera. This is fixed in the fragment shader!
 
             var fragmentShader:Array = [
-                // --- texture lookup ---
                 tex("ft0", "v1", 0, texture),
-                tex("ft1", "v3", 1, normalTexture, false),
-                "mul ft0, ft0, v2",      // texel color * vertex color     ft0 = surface color
+                "mul ft0, ft0, v2"       // texel color * vertex color     ft0 = surface color
+            ];
 
-                // --- calculate N ---
-                "mul ft1.xy, ft1.xy, fc2.xy", // N.xy *= 2
-                "sub ft1.xy, ft1.xy, fc1.xy", // N.xy -= 1
-                "neg ft1.z, ft1.z",           // fix direction of z axis
-                "neg ft1.y, ft1.y",           // fix direction of y axis
+            if (_normalTexture)
+                fragmentShader.push(
+                    tex("ft1", "v3", 1, normalTexture, false),
+                    "mul ft1.xy, ft1.xy, fc2.xy", // N.xy *= 2
+                    "sub ft1.xy, ft1.xy, fc1.xy", // N.xy -= 1
+                    "neg ft1.z, ft1.z",           // fix direction of z axis
+                    "neg ft1.y, ft1.y"            // fix direction of y axis
+                );
+            else // use default normal vector
+                fragmentShader.push(
+                    "mov ft1.xy, fc0.xy",
+                    "mov ft1.zw, fc1.zw",
+                    "neg ft1.z,  ft1.z"       // N = (0, 0, -1)
+                );
+
+            fragmentShader.push(
                 "m33 ft1.xyz, ft1.xyz, v5",   // move N into local coords
                 "nrm ft1.xyz, ft1.xyz"        // normalize N               ft1 = normal vector
-            ];
+            );
 
             var numLights:int = MathUtil.min(_lights.length, LightStyle.MAX_NUM_LIGHTS);
 
@@ -196,57 +204,55 @@ package starling.extensions.lighting
             // fs0 — texture
             // fs1 - normal texture
 
+            sVector[0] = sVector[1] = sVector[2] = sVector[3] = LightStyle.MAX_SHININESS;
+            context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, sVector);
+
+            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 0.0;
+            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, sVector);
+
+            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 1.0;
+            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 1, sVector);
+
+            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 2.0;
+            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 2, sVector);
+
+            sVector[0] = _cameraPosition.x; sVector[1] = _cameraPosition.y;
+            sVector[2] = _cameraPosition.z; sVector[3] = _cameraPosition.w;
+            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 3, sVector);
+
+            for (var i:int=0, len:int=_lights.length; i<len; ++i)
+            {
+                var light:Light = _lights[i];
+
+                sVector[0] = light.x; sVector[1] = light.y; sVector[2] = light.z; sVector[3] = 1.0;
+                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 10 + 2*i, sVector);
+
+                Color.toVector(light.color, sVector);
+                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 11 + 2*i, sVector);
+            }
+
             if (_normalTexture)
             {
-                sVector[0] = sVector[1] = sVector[2] = sVector[3] = LightStyle.MAX_SHININESS;
-                context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, sVector);
-
-                sVector[0] = sVector[1] = sVector[2] = sVector[3] = 0.0;
-                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, sVector);
-
-                sVector[0] = sVector[1] = sVector[2] = sVector[3] = 1.0;
-                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 1, sVector);
-
-                sVector[0] = sVector[1] = sVector[2] = sVector[3] = 2.0;
-                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 2, sVector);
-
-                sVector[0] = _cameraPosition.x; sVector[1] = _cameraPosition.y;
-                sVector[2] = _cameraPosition.z; sVector[3] = _cameraPosition.w;
-                context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 3, sVector);
-
-                for (var i:int=0, len:int=_lights.length; i<len; ++i)
-                {
-                    var light:Light = _lights[i];
-
-                    sVector[0] = light.x; sVector[1] = light.y; sVector[2] = light.z; sVector[3] = 1.0;
-                    context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 10 + 2*i, sVector);
-
-                    Color.toVector(light.color, sVector);
-                    context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 11 + 2*i, sVector);
-                }
-
                 var repeat:Boolean = textureRepeat && _normalTexture.root.isPotTexture;
                 RenderUtil.setSamplerStateAt(1, _normalTexture.mipMapping, textureSmoothing, repeat);
                 context.setTextureAt(1, _normalTexture.base);
-                vertexFormat.setVertexBufferAt(3, vertexBuffer, "normalTexCoords");
-                vertexFormat.setVertexBufferAt(4, vertexBuffer, "material");
-                vertexFormat.setVertexBufferAt(5, vertexBuffer, "xAxis");
-                vertexFormat.setVertexBufferAt(6, vertexBuffer, "yAxis");
-                vertexFormat.setVertexBufferAt(7, vertexBuffer, "zScale");
             }
+
+            vertexFormat.setVertexBufferAt(3, vertexBuffer, "normalTexCoords");
+            vertexFormat.setVertexBufferAt(4, vertexBuffer, "material");
+            vertexFormat.setVertexBufferAt(5, vertexBuffer, "xAxis");
+            vertexFormat.setVertexBufferAt(6, vertexBuffer, "yAxis");
+            vertexFormat.setVertexBufferAt(7, vertexBuffer, "zScale");
         }
 
         override protected function afterDraw(context:Context3D):void
         {
-            if (_normalTexture)
-            {
-                context.setTextureAt(1, null);
-                context.setVertexBufferAt(3, null);
-                context.setVertexBufferAt(4, null);
-                context.setVertexBufferAt(5, null);
-                context.setVertexBufferAt(6, null);
-                context.setVertexBufferAt(7, null);
-            }
+            context.setTextureAt(1, null);
+            context.setVertexBufferAt(3, null);
+            context.setVertexBufferAt(4, null);
+            context.setVertexBufferAt(5, null);
+            context.setVertexBufferAt(6, null);
+            context.setVertexBufferAt(7, null);
 
             super.afterDraw(context);
         }
