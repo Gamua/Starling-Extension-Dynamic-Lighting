@@ -27,7 +27,7 @@ package starling.extensions.lighting
     {
         public static const VERTEX_FORMAT:VertexDataFormat =
             MeshEffect.VERTEX_FORMAT.extend(
-                "normalTexCoords:float2, material:bytes4, xAxis:float2, yAxis:float2");
+                "normalTexCoords:float2, material:bytes4, xAxis:float2, yAxis:float2, zScale:float1");
 
         private var _lights:Vector.<Light>;
         private var _normalTexture:Texture;
@@ -57,6 +57,7 @@ package starling.extensions.lighting
                 "mov  v4, vt0     ",       // pass material to FP
 
                 "crs vt1.xyz, va5.xyz, va6.xyz",  // calculate local z-axis
+                "mul vt1.xyz, vt1.xyz, va7.xxx",  // (possibly) flip local z-axis
 
                 "mov v5.xw, va5.xw",  // vertices va5, va6, vt1 contain the basis vectors of the
                 "mov v6.xw, va5.yw",  // local coordinate system. By storing them transposed in
@@ -190,6 +191,7 @@ package starling.extensions.lighting
             // va4 - material (ambientRatio, diffuseRatio, specularRatio, shininess)
             // va5 - x-axis vector (xy)
             // va6 - y-axis vector (xy)
+            // va7 - z-axis scale (x) - either '1' or '-1', to flip the z-axis if necessary
 
             // fs0 — texture
             // fs1 - normal texture
@@ -230,6 +232,7 @@ package starling.extensions.lighting
                 vertexFormat.setVertexBufferAt(4, vertexBuffer, "material");
                 vertexFormat.setVertexBufferAt(5, vertexBuffer, "xAxis");
                 vertexFormat.setVertexBufferAt(6, vertexBuffer, "yAxis");
+                vertexFormat.setVertexBufferAt(7, vertexBuffer, "zScale");
             }
         }
 
@@ -242,6 +245,7 @@ package starling.extensions.lighting
                 context.setVertexBufferAt(4, null);
                 context.setVertexBufferAt(5, null);
                 context.setVertexBufferAt(6, null);
+                context.setVertexBufferAt(7, null);
             }
 
             super.afterDraw(context);

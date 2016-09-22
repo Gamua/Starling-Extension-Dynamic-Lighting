@@ -124,8 +124,24 @@ package starling.extensions.lighting
                 sMatrix.setTo(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
                 vertexData.copyAttributeTo(targetVertexData, targetVertexID, "xAxis", sMatrix, vertexID, numVertices);
                 vertexData.copyAttributeTo(targetVertexData, targetVertexID, "yAxis", sMatrix, vertexID, numVertices);
-            }
 
+                if (matrix.a * matrix.d < 0)
+                {
+                    // When we end up here, the mesh has been flipped horizontally or vertically.
+                    // Unfortunately, this makes the local z-axis point into the screen, which
+                    // means we're now looking at the object from behind, and it becomes dark.
+                    // We reverse this effect manually via the "zScale" vertex attribute.
+
+                    if (numVertices < 0)
+                        numVertices = vertexData.numVertices - vertexID;
+
+                    for (var i:int=0; i<numVertices; ++i)
+                    {
+                        var zScale:Number = vertexData.getFloat(vertexID + i, "zScale");
+                        targetVertexData.setFloat(targetVertexID + i, "zScale", zScale * -1);
+                    }
+                }
+            }
         }
 
         /** @private */
@@ -216,6 +232,7 @@ package starling.extensions.lighting
                 setVertexMaterial(i, _material);
                 vertexData.setPoint(i, "xAxis", 1, 0);
                 vertexData.setPoint(i, "yAxis", 0, 1);
+                vertexData.setFloat(i, "zScale", 1);
             }
         }
 
