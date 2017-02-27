@@ -21,6 +21,7 @@ package starling.extensions.lighting
     import starling.utils.Color;
     import starling.utils.MathUtil;
     import starling.utils.RenderUtil;
+    import starling.utils.StringUtil;
 
     /** @private */
     public class LightEffect extends MeshEffect
@@ -86,15 +87,14 @@ package starling.extensions.lighting
             if (_normalTexture)
                 fragmentShader.push(
                     tex("ft1", "v3", 1, normalTexture, false),
-                    "mul ft1.xy, ft1.xy, fc2.xy", // N.xy *= 2
-                    "sub ft1.xy, ft1.xy, fc1.xy", // N.xy -= 1
+                    "mul ft1.xy, ft1.xy, fc0.zz", // N.xy *= 2
+                    "sub ft1.xy, ft1.xy, fc0.yy", // N.xy -= 1
                     "neg ft1.z, ft1.z",           // fix direction of z axis
                     "neg ft1.y, ft1.y"            // fix direction of y axis
                 );
             else // use default normal vector
                 fragmentShader.push(
-                    "mov ft1.xy, fc0.xy",
-                    "mov ft1.zw, fc1.zw",
+                    "mov ft1, fc0.xxyy",
                     "neg ft1.z,  ft1.z"       // N = (0, 0, -1)
                 );
 
@@ -127,16 +127,16 @@ package starling.extensions.lighting
                     fragmentShader.push(
                         // --- calculate L . N ---
                         calcLightVector,
-                        "nrm ft2.xyz, ft2.xyz",   // normalize light vector          ft2 = L
+                        nrm("ft2"),               // normalize light vector          ft2 = L
                         "dp3 ft3, ft2, ft1",      //                                 ft3 = L.N
                         "sat ft3, ft3",           // clamp to 0-1
 
                         // --- calculate R . V ---
-                        "mul ft4, ft3, fc2",      // ft4  = (L.N) * 2
+                        "mul ft4, ft3, fc0.z",    // ft4  = (L.N) * 2
                         "mul ft4, ft4, ft1",      // ft4 *= N
                         "sub ft4, ft4, ft2",      // ft4 -= L                        ft4 = R
                         "sub ft5, fc3, v0",       // calculate view vector
-                        "nrm ft5.xyz, ft5.xyz",   // normalize view vector           ft5 = V
+                        nrm("ft5"),               // normalize view vector           ft5 = V
                         "dp3 ft2, ft4, ft5",      //                                 ft2 = R.V
                         "sat ft2, ft2",           // clamp to 0-1
 
@@ -146,13 +146,13 @@ package starling.extensions.lighting
 
                         // --- calculate specular color ---
                         "pow ft4, ft2, v4.wwww",  // apply shininess
-                        "mul ft4, ft4, " + lCol,  // specular color = (L.N)^shininess * light color
+                        "mul ft4, ft4, " + lCol,  // specular color = (R.V)^shininess * light color
                         "mul ft4, ft4, v4.zzzz",  // specular color *= specular ratio
-                        "mul ft4, ft4, ft0.wwww", // premultiply alpha
+                        "mul ft4, ft4, ft0.wwww", // pre-multiply alpha
 
                         // --- calculate total illumination from this light ---
-                        "mul ft2, ft0, ft3" ,    // illumination = surface color * diffuse color
-                        "add ft2, ft2, ft4"      // illumination += specular color
+                        "mul ft2, ft0, ft3" ,     // illumination = surface color * diffuse color
+                        "add ft2, ft2, ft4"       // illumination += specular color
                     );
                 }
 
@@ -163,7 +163,7 @@ package starling.extensions.lighting
             }
 
             if (numLights == 0)
-                fragmentShader.push("mov ft6, fc0");
+                fragmentShader.push("mov ft6, fc0.xxxx");
 
             fragmentShader.push(
                 "mov ft6.w, ft0.w",      // restore alpha
@@ -171,19 +171,28 @@ package starling.extensions.lighting
             );
 
             return Program.fromSource(vertexShader.join("\n"), fragmentShader.join("\n"));
+
+            /** On iOS, normalization seems to work only up to a specific vector length; my
+             *  guess is that squaring the coordinates exceeds the possible number range. Thus,
+             *  we're scaling the vector to 10% of its original length before normalizing. */
+            function nrm(register:String):String
+            {
+                return StringUtil.format(
+                    "mul {0}.xyz, {0}.xyz, fc0.www \n" +
+                    "nrm {0}.xyz, {0}.xyz", register
+                );
+            }
         }
 
         override protected function beforeDraw(context:Context3D):void
         {
             super.beforeDraw(context);
 
-            // vc0-vc3 — MVP matrix
-            // vc4 — alpha value (same value for all components)
+            // vc0-vc3 - MVP matrix
+            // vc4 - alpha value (same value for all components)
             // vc5 - max shininess
 
-            // fc0 - [0, 0, 0, 0]
-            // fc1 - [1, 1, 1, 1]
-            // fc2 - [2, 2, 2, 2]
+            // fc0 - [0, 1, 2, 0.1]
             // fc3 - camera position
 
             // fc10 - light 0, position
@@ -207,14 +216,8 @@ package starling.extensions.lighting
             sVector[0] = sVector[1] = sVector[2] = sVector[3] = LightStyle.MAX_SHININESS;
             context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, sVector);
 
-            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 0.0;
+            sVector[0] = 0.0; sVector[1] = 1.0; sVector[2] = 2.0; sVector[3] = 0.1;
             context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, sVector);
-
-            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 1.0;
-            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 1, sVector);
-
-            sVector[0] = sVector[1] = sVector[2] = sVector[3] = 2.0;
-            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 2, sVector);
 
             sVector[0] = _cameraPosition.x; sVector[1] = _cameraPosition.y;
             sVector[2] = _cameraPosition.z; sVector[3] = _cameraPosition.w;
