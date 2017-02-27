@@ -37,7 +37,7 @@ package
         [Embed(source="../assets/character.xml", mimeType="application/octet-stream")]
         private static const CharacterXml:Class;
 
-        private var _characters:Vector.<MovieClip>;
+        private var _characters:Sprite;
         private var _stageWidth:Number;
         private var _stageHeight:Number;
 
@@ -45,7 +45,10 @@ package
         {
             _stageWidth  = Starling.current.stage.stageWidth;
             _stageHeight = Starling.current.stage.stageHeight;
-            _characters = new <MovieClip>[];
+
+            _characters = new Sprite();
+            _characters.y = _stageHeight / 2;
+            addChild(_characters);
 
             var characterTexture:Texture = Texture.fromEmbeddedAsset(CharacterTexture);
             var characterNormalTexture:Texture = Texture.fromEmbeddedAsset(CharacterNormalTexture);
@@ -57,26 +60,26 @@ package
             var normalTextures:Vector.<Texture> = normalTextureAtlas.getTextures();
 
             var ambientLight:LightSource = LightSource.createAmbientLight();
-            ambientLight.x = 380;
-            ambientLight.y = 60;
+            ambientLight.x = _stageWidth * 0.5;
+            ambientLight.y = _stageHeight * 0.2;
             ambientLight.z = -150;
             ambientLight.showLightBulb = true;
 
             var pointLightA:LightSource = LightSource.createPointLight(0x00ff00);
-            pointLightA.x = 180;
-            pointLightA.y = 60;
+            pointLightA.x = _stageWidth * 0.25;
+            pointLightA.y = _stageHeight * 0.2;
             pointLightA.z = -150;
             pointLightA.showLightBulb = true;
 
             var pointLightB:LightSource = LightSource.createPointLight(0xff00ff);
-            pointLightB.x = 580;
-            pointLightB.y = 60;
+            pointLightB.x = _stageWidth * 0.75;
+            pointLightB.y = _stageHeight * 0.2;
             pointLightB.z = -150;
             pointLightB.showLightBulb = true;
 
             var directionalLight:LightSource = LightSource.createDirectionalLight();
-            directionalLight.x = 460;
-            directionalLight.y = 100;
+            directionalLight.x = _stageWidth * 0.6;
+            directionalLight.y = _stageHeight * 0.3;
             directionalLight.z = -150;
             directionalLight.rotationY = -1.0;
             directionalLight.showLightBulb = true;
@@ -102,10 +105,10 @@ package
                 var movie:MovieClip = createCharacter(textures, normalTextures);
                 movie.currentTime = movie.totalTime * Math.random();
                 movie.x = -characterWidth + i * offset;
-                movie.y = -10;
+                movie.y = movie.height / -2;
                 movie.addEventListener(Event.ENTER_FRAME, onEnterFrame);
                 addChild(movie);
-                _characters.push(movie);
+                _characters.addChild(movie);
             }
 
             function onEnterFrame(event:Event, passedTime:Number):void
@@ -128,7 +131,7 @@ package
                     new <Texture>[normalTexture], 1);
 
             movie.alignPivot();
-            _characters.push(movie);
+            _characters.addChild(movie);
 
             var sprite3D:Sprite3D = new Sprite3D();
             sprite3D.addChild(movie);

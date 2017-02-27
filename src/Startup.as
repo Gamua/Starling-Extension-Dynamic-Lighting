@@ -11,9 +11,11 @@
 package {
 
     import flash.display.Sprite;
+    import flash.geom.Rectangle;
     import flash.system.Capabilities;
 
     import starling.core.Starling;
+    import starling.utils.SystemUtil;
 
     [SWF(width="760", height="300", frameRate="60", backgroundColor="#202020")]
     public class Startup extends Sprite
@@ -22,7 +24,12 @@ package {
 
         public function Startup()
         {
-            _starling = new Starling(Demo, stage);
+            var viewPort:Rectangle = null;
+
+            if (!SystemUtil.isDesktop)
+                viewPort = new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight);
+
+            _starling = new Starling(Demo, stage, viewPort);
             _starling.enableErrorChecking = Capabilities.isDebugger;
             _starling.skipUnchangedFrames = true;
             _starling.showStats = false;
