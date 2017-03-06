@@ -172,9 +172,10 @@ package starling.extensions.lighting
 
             return Program.fromSource(vertexShader.join("\n"), fragmentShader.join("\n"));
 
-            /** On iOS, normalization seems to work only up to a specific vector length; my
-             *  guess is that squaring the coordinates exceeds the possible number range. Thus,
-             *  we're scaling the vector to 10% of its original length before normalizing. */
+            /** Stage3D uses medium precision in the fp, guaranteeing a range of +/- 2^14.
+             *  As part of the vector normalization, the coordinates need to be squared, and
+             *  that easily overshoots those bounds. To be on the safe side, the vector is
+             *  thus scaled to 10% of its original length before normalizing. */
             function nrm(register:String):String
             {
                 return StringUtil.format(
