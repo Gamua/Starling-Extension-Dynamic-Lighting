@@ -351,7 +351,7 @@ package starling.extensions.lighting
 
         /** The amount of ambient light reflected by the surface. As a rule of thumb, ambient
          *  and diffuse ratio should sum up to '1'. @default 0.5 */
-        public function get ambientRatio():Number { return getAmbientRatio(0); }
+        public function get ambientRatio():Number { return _material.ambientRatio; }
         public function set ambientRatio(value:Number):void
         {
             _material.ambientRatio = value;
@@ -365,7 +365,7 @@ package starling.extensions.lighting
 
         /** The amount of diffuse light reflected by the surface. As a rule of thumb, ambient
          *  and diffuse ratio should sum up to '1'. @default 0.5 */
-        public function get diffuseRatio():Number { return getDiffuseRatio(0); }
+        public function get diffuseRatio():Number { return _material.diffuseRatio; }
         public function set diffuseRatio(value:Number):void
         {
             _material.diffuseRatio = value;
@@ -378,7 +378,7 @@ package starling.extensions.lighting
         }
 
         /** The amount of specular light reflected by the surface. @default 0.1 */
-        public function get specularRatio():Number { return getSpecularRatio(0); }
+        public function get specularRatio():Number { return _material.specularRatio; }
         public function set specularRatio(value:Number):void
         {
             _material.specularRatio = value;
@@ -392,7 +392,7 @@ package starling.extensions.lighting
 
         /** Shininess is larger for surfaces that are smooth and mirror-like. When this value
          *  is large the specular highlight is small. Range: 0 - 32 @default 1.0 */
-        public function get shininess():Number { return getShininess(0); }
+        public function get shininess():Number { return _material.shininess; }
         public function set shininess(value:Number):void
         {
             _material.shininess = value;
