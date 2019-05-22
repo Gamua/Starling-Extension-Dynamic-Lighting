@@ -334,7 +334,7 @@ class Light
     public var color:uint;
     public var type:String;
 
-    public function Light(color:uint=0xffffff, type="point")
+    public function Light(color:uint=0xffffff, type:String="point")
     {
         x = y = z = 0.0;
         this.color = color;
