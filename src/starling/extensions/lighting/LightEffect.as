@@ -41,10 +41,6 @@ package starling.extensions.lighting
         {
             _lights = new <Light>[];
             _cameraPosition = new Vector3D();
-            _attenuationCoefficients[0] = 1.0;
-            _attenuationCoefficients[1] = 0.1;
-            _attenuationCoefficients[2] = 0.01;
-            _attenuationCoefficients[3] = 0;
         }
 
         override protected function createProgram():Program
@@ -154,8 +150,8 @@ package starling.extensions.lighting
 
                             // --- calculate attenuation ---
                             "mul ft4.z, fc7.y, ft4.y", // ft4.z = (linear * distance))
-                            "mul ft4.w, fc7.z, ft4.x", // ft4.w = (quadratic * (distance*distance))
                             "add ft5.x, fc7.x, ft4.z", // ft5.x = constant + ft4.z
+                            "mul ft4.w, fc7.z, ft4.x", // ft4.w = (quadratic * (distance*distance))
                             "add ft5.x, ft5.x, ft4.w", // ft5.x = ft5.x + ft4.w
                             "rcp ft5.x, ft5.x",        // ft5.x = 1/ft5.x
 
@@ -352,7 +348,7 @@ package starling.extensions.lighting
             _cameraPosition.copyFrom(value);
         }
 
-         /** The position of the camere in the local coordinate system of the rendered object. */
+        /** The coefficients used in the calculation of the attenuation for point lights, Stored as [constant, linear, quadratic]. */
         public function get attenuationCoefficients():Vector.<Number> { return _attenuationCoefficients; }
 
 

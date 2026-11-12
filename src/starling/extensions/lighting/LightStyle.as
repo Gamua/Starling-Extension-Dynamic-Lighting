@@ -186,6 +186,8 @@ package starling.extensions.lighting
             // update camera position
             sPoint3D.copyFrom(stage.cameraPosition);
             MatrixUtil.transformPoint3D(sMatrixAlt3D, sPoint3D, lightEffect.cameraPosition);
+
+            // update attenuation coefficients
             lightEffect.attenuationCoefficients[0] = _material.constantAttnCoeff;
             lightEffect.attenuationCoefficients[1] = _material.linearAttnCoeff;
             lightEffect.attenuationCoefficients[2] = _material.quadraticAttnCoeff;
@@ -380,18 +382,21 @@ package starling.extensions.lighting
             }
         }
 
+        /** Constant coefficient used for point light attenuation, defaults to 1. */
         public function get constantCoefficient():Number { return _material.constantAttnCoeff; }
         public function set constantCoefficient(value:Number):void
         {
             _material.constantAttnCoeff = value;
         }
 
+        /** Linear coefficient used for point light attenuation, defaults to 0. */
         public function get linearCoefficient():Number { return _material.linearAttnCoeff; }
         public function set linearCoefficient(value:Number):void
         {
             _material.linearAttnCoeff = value;
         }
 
+        /** Quadratic coefficient used for point light attenuation, defaults to 0. */
         public function get quadraticCoefficient():Number { return _material.quadraticAttnCoeff; }
         public function set quadraticCoefficient(value:Number):void
         {
@@ -443,8 +448,8 @@ class Material
     
     public function Material(ambientRatio:Number=0.5, diffuseRatio:Number=0.5, 
                              specularRatio:Number=0.1, shininess:Number=1.0,
-                             constantAttnCoeff:Number=1.0, linearAttnCoeff:Number=0.1,
-                             quadraticAttnCoeff:Number=0.01)
+                             constantAttnCoeff:Number=1.0, linearAttnCoeff:Number=0.0,
+                             quadraticAttnCoeff:Number=0.0)
     {
         this.ambientRatio = ambientRatio;
         this.diffuseRatio = diffuseRatio;
