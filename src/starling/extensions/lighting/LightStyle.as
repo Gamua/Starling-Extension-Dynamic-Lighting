@@ -186,6 +186,9 @@ package starling.extensions.lighting
             // update camera position
             sPoint3D.copyFrom(stage.cameraPosition);
             MatrixUtil.transformPoint3D(sMatrixAlt3D, sPoint3D, lightEffect.cameraPosition);
+            lightEffect.attenuationCoefficients[0] = _material.constantAttnCoeff;
+            lightEffect.attenuationCoefficients[1] = _material.linearAttnCoeff;
+            lightEffect.attenuationCoefficients[2] = _material.quadraticAttnCoeff;
             
             for (var i:int=0; i<lights.length; ++i)
             {
@@ -377,6 +380,24 @@ package starling.extensions.lighting
             }
         }
 
+        public function get constantCoefficient():Number { return _material.constantAttnCoeff; }
+        public function set constantCoefficient(value:Number):void
+        {
+            _material.constantAttnCoeff = value;
+        }
+
+        public function get linearCoefficient():Number { return _material.linearAttnCoeff; }
+        public function set linearCoefficient(value:Number):void
+        {
+            _material.linearAttnCoeff = value;
+        }
+
+        public function get quadraticCoefficient():Number { return _material.quadraticAttnCoeff; }
+        public function set quadraticCoefficient(value:Number):void
+        {
+            _material.quadraticAttnCoeff = value;
+        }
+
         /** The amount of specular light reflected by the surface. @default 0.1 */
         public function get specularRatio():Number { return _material.specularRatio; }
         public function set specularRatio(value:Number):void
@@ -415,14 +436,23 @@ class Material
     public var diffuseRatio:Number;
     public var specularRatio:Number;
     public var shininess:Number;
+
+    public var constantAttnCoeff:Number;
+    public var linearAttnCoeff:Number;
+    public var quadraticAttnCoeff:Number;
     
     public function Material(ambientRatio:Number=0.5, diffuseRatio:Number=0.5, 
-                             specularRatio:Number=0.1, shininess:Number=1.0)
+                             specularRatio:Number=0.1, shininess:Number=1.0,
+                             constantAttnCoeff:Number=1.0, linearAttnCoeff:Number=0.1,
+                             quadraticAttnCoeff:Number=0.01)
     {
         this.ambientRatio = ambientRatio;
         this.diffuseRatio = diffuseRatio;
         this.specularRatio = specularRatio;
         this.shininess = shininess;
+        this.constantAttnCoeff = constantAttnCoeff;
+        this.linearAttnCoeff = linearAttnCoeff;
+        this.quadraticAttnCoeff = quadraticAttnCoeff;
     }
     
     public function copyFrom(material:Material):void
@@ -431,6 +461,9 @@ class Material
         diffuseRatio = material.diffuseRatio;
         specularRatio = material.specularRatio;
         shininess = material.shininess;
+        constantAttnCoeff = material.constantAttnCoeff;
+        linearAttnCoeff = material.linearAttnCoeff;
+        quadraticAttnCoeff = material.quadraticAttnCoeff;
     }
 
     public function decode(encoded:uint):void
