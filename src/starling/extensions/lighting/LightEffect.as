@@ -33,6 +33,7 @@ package starling.extensions.lighting
         private var _lights:Vector.<Light>;
         private var _normalTexture:Texture;
         private var _cameraPosition:Vector3D;
+        private var _attenuationCoefficients:Vector.<Number> = new Vector.<Number>(4, true);
 
         private static const sVector:Vector.<Number> = new Vector.<Number>(4, true);
 
@@ -138,21 +139,44 @@ package starling.extensions.lighting
                         "sub ft5, fc3, v0",       // calculate view vector
                         nrm("ft5"),               // normalize view vector           ft5 = V
                         "dp3 ft2, ft4, ft5",      //                                 ft2 = R.V
-                        "sat ft2, ft2",           // clamp to 0-1
+                        "sat ft2, ft2"           // clamp to 0-1
+                    );
 
+                    if(light.type == LightSource.TYPE_POINT) {
+                        fragmentShader.push(
+                            // --- calculate distance ---
+                            "dp3 ft4.x, ft2.xyz, ft2.xyz", // ft4.x = dot(ft4)
+                            "sqt ft4.y, ft4.x",            // ft4.y = sqrt(ft4.x)
+
+                            // --- calculate attenuation ---
+                            "mul ft4.z, fc7.y, ft4.y", // ft4.z = (linear * distance))
+                            "add ft5.x, fc7.x, ft4.z", // ft5.x = constant + ft4.z
+                            "mul ft4.w, fc7.z, ft4.x", // ft4.w = (quadratic * (distance*distance))
+                            "add ft5.x, ft5.x, ft4.w", // ft5.x = ft5.x + ft4.w
+                            "rcp ft5.x, ft5.x",        // ft5.x = 1/ft5.x
+
+                            // --- apply attenuation to diffuse and specular ratios ---
+                            "mul ft5.yz, v4.yz, ft5.xx"
+                        );
+                    }
+
+                    var dRatio:String = (light.type == LightSource.TYPE_POINT) ? "ft5.yyyy" : "v4.yyyy";
+                    var sRatio:String = (light.type == LightSource.TYPE_POINT) ? "ft5.zzzz" : "v4.zzzz";
+
+                    fragmentShader.push(
                         // --- calculate diffuse color ---
-                        "mul ft3, ft3, " + lCol,  // diffuse color = (L.N) * light color
-                        "mul ft3, ft3, v4.yyyy",  // diffuse color *= diffuse ratio
+                        "mul ft3, ft3, " + lCol,    // diffuse color = (L.N) * light color
+                        "mul ft3, ft3, " + dRatio,  // diffuse color *= diffuse ratio
 
                         // --- calculate specular color ---
-                        "pow ft4, ft2, v4.wwww",  // apply shininess
-                        "mul ft4, ft4, " + lCol,  // specular color = (R.V)^shininess * light color
-                        "mul ft4, ft4, v4.zzzz",  // specular color *= specular ratio
-                        "mul ft4, ft4, ft0.wwww", // pre-multiply alpha
+                        "pow ft4, ft2, v4.wwww",    // apply shininess
+                        "mul ft4, ft4, " + lCol,    // specular color = (R.V)^shininess * light color
+                        "mul ft4, ft4, " + sRatio,  // specular color *= specular ratio
+                        "mul ft4, ft4, ft0.wwww",   // pre-multiply alpha
 
                         // --- calculate total illumination from this light ---
-                        "mul ft2, ft0, ft3" ,     // illumination = surface color * diffuse color
-                        "add ft2, ft2, ft4"       // illumination += specular color
+                        "mul ft2, ft0, ft3" ,       // illumination = surface color * diffuse color
+                        "add ft2, ft2, ft4"         // illumination += specular color
                     );
                 }
 
@@ -195,6 +219,7 @@ package starling.extensions.lighting
 
             // fc0 - [0, 1, 2, 0.1]
             // fc3 - camera position
+            // fc7 - attenuation coefficients
 
             // fc10 - light 0, position
             // fc11 - light 0, color
@@ -223,6 +248,8 @@ package starling.extensions.lighting
             sVector[0] = _cameraPosition.x; sVector[1] = _cameraPosition.y;
             sVector[2] = _cameraPosition.z; sVector[3] = _cameraPosition.w;
             context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 3, sVector);
+
+            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 7, _attenuationCoefficients);
 
             for (var i:int=0, len:int=_lights.length; i<len; ++i)
             {
@@ -320,6 +347,10 @@ package starling.extensions.lighting
         {
             _cameraPosition.copyFrom(value);
         }
+
+        /** The coefficients used in the calculation of the attenuation for point lights, Stored as [constant, linear, quadratic]. */
+        public function get attenuationCoefficients():Vector.<Number> { return _attenuationCoefficients; }
+
 
         public function get normalTexture():Texture { return _normalTexture; }
         public function set normalTexture(value:Texture):void { _normalTexture = value; }
